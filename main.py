@@ -9,7 +9,9 @@ warns_del = 3
 admins = []
 warning_users = []
 groups = [
-    'g0DjNjc0eeaec8ae92ee9c9bfbdd3f95'
+    '', # group one
+    '', # group two
+    # and...
 ]
 
 filters = [
