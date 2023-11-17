@@ -259,6 +259,8 @@ async def main():
 🚫⏲ unset timer: `unset-timer`
 
 🚫👤 ban user: 'ban'(be sure to replay) or `ban @id`
+
+💻 programmer: @khode_linux
                             ''',
                             reply_to_message_id=update.message_id
                         )
