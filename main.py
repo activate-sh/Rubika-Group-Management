@@ -4,10 +4,7 @@ from rich.console import Console
 from datetime import datetime
 from asyncio import run
 
-warns_del = 3
-
 admins = []
-warning_users = []
 groups = [
     '', # group one
     '', # group two
