@@ -1,21 +1,25 @@
 from rubpy import Client, Message, handlers
 from rubpy import models, methods, exceptions
 from rich.console import Console
-from os import system, uname
+from datetime import datetime
 from asyncio import run
 
+warns_del = 3
+
 admins = []
+warning_users = []
 groups = [
     'g0DjNjc0eeaec8ae92ee9c9bfbdd3f95'
 ]
 
-console = Console()
+filters = [
+    '@',
+    'joinc',
+    'joing'
+    'rubika.ir'
+]
 
-def clearPage() -> None:
-    if uname()[0] == 'Linux':
-        system('clear')
-    else:
-        system('cls')
+console = Console()
 
 
 async def updateAdmins(client: Client) -> None:
@@ -33,18 +37,69 @@ async def updateAdmins(client: Client) -> None:
 async def main():
     async with Client(session='.myAccount', timeout=20) as client:
         with console.status('bot in runing...') as status:
-            await updateAdmins(client)
+            await updateAdmins(client=client)
             for guid in groups:
                 results = await client.get_group_info(group_guid=guid)
                 group_name = results.group.group_title
+                now = datetime.now()
                 await client.send_message(
                     object_guid=guid,
-                    message=f'the bot was successfully activated in chat {group_name}',
+                    message=f'the bot was successfully activated in chat {group_name}\n'
+                            f'- time 『 {now.hour}:{now.minute}:{now.second} 』',
                 )
-
             @client.on(handlers.MessageUpdates(models.is_group))
             async def updates(update: Message):
-                if (
+
+                for filter in filters:
+                    if (
+                        update.author_guid not in admins and
+                        filter in update.raw_text and
+                        update.raw_text != None
+                    ):
+                        await client.delete_messages(
+                            object_guid=update.object_guid,
+                            message_ids=update.message_id
+                        )
+                try:
+                    if (
+                            update.message.event_data.type == 'JoinedGroupByLink' or
+                            update.message.event_data.type == 'AddedGroupMembers'
+                    ):
+                        results = await client.get_group_info(group_guid=update.object_guid)
+                        group_name = results.group.group_title
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message=f'hello🖐🏻 welcome to {group_name} 💞💖',
+                            reply_to_message_id=update.message_id
+                        )
+                    elif update.message.event_data.type == 'LeaveGroup':
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message='by 👋🏻👋🏻👋🏻',
+                            reply_to_message_id=update.message_id
+                        )
+                except AttributeError:
+                    pass
+
+
+                if update.raw_text == 'test':
+                    await client.send_message(
+                        object_guid=update.object_guid,
+                        message='The bot is active ✅',
+                        reply_to_message_id=update.message_id
+                    )
+
+
+                elif update.raw_text == 'link':
+                    results = await client(methods.groups.GetGroupLink(update.object_guid))
+                    await client.send_message(
+                        object_guid=update.object_guid,
+                        message=f'`{results.join_link}`',
+                        reply_to_message_id=update.message_id
+                    )
+
+
+                elif (
                     update.object_guid in groups and
                     update.author_guid in admins and
                     update.raw_text != None
@@ -72,6 +127,16 @@ async def main():
                             message='The group was successfully closed ✅',
                             reply_to_message_id=update.message_id
                         )
+
+
+                    elif update.raw_text == 'update-admins':
+                        message = await client.send_message(
+                            object_guid=update.object_guid,
+                            message='Updating the list of admins...',
+                            reply_to_message_id=update.message_id
+                        )
+                        await updateAdmins(client=client)
+                        await message.edit('The list of admins has been updated ✅')
 
 
                     elif update.raw_text == 'ban':
@@ -140,9 +205,67 @@ async def main():
                                 )
 
 
+                    elif update.raw_text.startswith('timer'):
+                        try:
+                            time = int(update.raw_text.split()[-1])
+                            if time == '':
+                                await client.send_message(
+                                    object_guid=update.object_guid,
+                                    message='The entered information is not correct❗',
+                                    reply_to_message_id=update.message_id
+                                )
+                            elif time > 3600:
+                                await client.send_message(
+                                    object_guid=update.object_guid,
+                                    message='The timer cannot be more than 3600 seconds(one hour)❗',
+                                    reply_to_message_id=update.message_id
+                                )
+                            else:
+                                await client.set_group_timer(group_guid=update.object_guid, time=time)
+                                await client.send_message(
+                                    object_guid=update.object_guid,
+                                    message=f'The timer was set to {time} seconds ✅',
+                                    reply_to_message_id=update.message_id
+                                )
+                        except ValueError:
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='The entered information is not correct❗',
+                                reply_to_message_id=update.message_id
+                            )
+
+
+                    elif update.raw_text == 'unset-timer':
+                        await client.set_group_timer(group_guid=update.object_guid, time=0)
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message='The timer went off ✅',
+                            reply_to_message_id=update.message_id
+                        )
+
+
+                    elif update.raw_text == 'info':
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message='''
+📌 Robot commands:
+
+🔐 open group: `open`
+
+🔓 close group: `close`
+
+⏲ create timer: `timer 10`
+
+🚫⏲ unset timer: `unset-timer`
+
+🚫👤 ban user: 'ban'(be sure to replay) or `ban @id`
+                            ''',
+                            reply_to_message_id=update.message_id
+                        )
+
+
             await client.run_until_disconnected()
 
 
 if __name__ == '__main__':
-    clearPage()
     run(main())
