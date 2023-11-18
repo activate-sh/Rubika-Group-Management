@@ -243,6 +243,20 @@ async def main():
                         )
 
 
+                    elif update.raw_text == 'clear-black-list':
+                        results = await client.get_banned_group_members(group_guid=update.object_guid)
+                        for user in results.in_chat_members:
+                            await client.unban_group_member(
+                                group_guid=update.object_guid,
+                                member_guid=user.member_guid
+                            )
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message='The blacklist of the group was deleted ✅',
+                            reply_to_message_id=update.message_id
+                        )
+
+
                     elif update.raw_text == 'add-admin':
                         if update.reply_message_id != None:
                             results = await client(methods.messages.GetMessagesByID(
