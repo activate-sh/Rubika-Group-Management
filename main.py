@@ -6,8 +6,8 @@ from asyncio import run
 
 admins = []
 groups = [
-    '', # group one
-    '', # group two
+    'g0DjNjc0eeaec8ae92ee9c9bfbdd3f95', # group one
+    # '', # group two
     # and...
 ]
 
@@ -243,6 +243,96 @@ async def main():
                         )
 
 
+                    elif update.raw_text == 'clear-black-list':
+                        results = await client.get_banned_group_members(group_guid=update.object_guid)
+                        for user in results.in_chat_members:
+                            await client.unban_group_member(
+                                group_guid=update.object_guid,
+                                member_guid=user.member_guid
+                            )
+                        await client.send_message(
+                            object_guid=update.object_guid,
+                            message='The blacklist of the group was deleted ✅',
+                            reply_to_message_id=update.message_id
+                        )
+
+
+                    elif update.raw_text == 'add-admin':
+                        if update.reply_message_id != None:
+                            results = await client(methods.messages.GetMessagesByID(
+                                update.object_guid, [update.reply_message_id])
+                            )
+                            user_guid = results.messages[0].author_object_guid
+                            if not user_guid in admins:
+                                await client.set_group_admin(
+                                    group_guid=update.object_guid,
+                                    member_guid=user_guid,
+                                    access_list=[
+                                        'SetAdmin', 'ChangeInfo', 'BanMember',
+                                        'PinMessages', 'SetJoinLink', 'SetMemberAccess',
+                                        'DeleteGlobalAllMessages'
+                                    ],
+                                    action='SetAdmin'
+                                )
+                                await client.send_message(
+                                    object_guid=update.object_guid,
+                                    message='The user became an admin in the group ✅',
+                                    reply_to_message_id=update.message_id
+                                )
+                            else:
+                                await client.send_message(
+                                    object_guid=update.object_guid,
+                                    message='The user is now in the admin group❕',
+                                    reply_to_message_id=update.message_id
+                                )
+                        else:
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='Please reply to a message❗',
+                                reply_to_message_id=update.message_id
+                            )
+
+
+                    elif update.raw_text == 'pin':
+                        try:
+                            await client.set_pin_message(
+                                object_guid=update.object_guid,
+                                message_id=update.reply_message_id,
+                                action='Pin'
+                            )
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='The message has been pinned ✅',
+                                reply_to_message_id=update.message_id
+                            )
+                        except:
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='Please reply to a message❗',
+                                reply_to_message_id=update.message_id
+                            )
+
+
+                    elif update.raw_text == 'un-pin':
+                        try:
+                            await client.unset_pin_message(
+                                object_guid=update.object_guid,
+                                message_id=update.reply_message_id,
+                                action='Unpin'
+                            )
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='The message was unpinned ✅',
+                                reply_to_message_id=update.message_id
+                            )
+                        except:
+                            await client.send_message(
+                                object_guid=update.object_guid,
+                                message='Please reply to a message❗',
+                                reply_to_message_id=update.message_id
+                            )
+
+
                     elif update.raw_text == 'info':
                         await client.send_message(
                             object_guid=update.object_guid,
@@ -253,11 +343,17 @@ async def main():
 
 🔓 close group: `close`
 
+📌 pin message: `pin`(be sure to replay)
+
+🚫📌 un pin message: `un-pin`(be sure to replay)
+
+💼👤 set group admin: `admin`(be sure to replay)
+
 ⏲ create timer: `timer 10`
 
 🚫⏲ unset timer: `unset-timer`
 
-🚫👤 ban user: 'ban'(be sure to replay) or `ban @id`
+🚫👤 ban user: `ban`(be sure to replay) or `ban @id`
 
 💻 programmer: @khode_linux
                             ''',
