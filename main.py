@@ -5,7 +5,6 @@ from datetime import datetime
 from asyncio import run
 
 admins = [] # No need to edit this list
-
 groups = [
     'g0DjNjc0eeaec8ae92ee9c9bfbdd3f95', # group one
     # '', # group two
@@ -21,7 +20,6 @@ filters = [
 
 console = Console()
 
-
 async def updateAdmins(client: Client) -> None:
     global admins
     for guid in groups:
@@ -33,19 +31,23 @@ async def updateAdmins(client: Client) -> None:
                 continue
 
 
+async def startBot(client: Client) -> None:
+    await updateAdmins(client=client)
+    for guid in groups:
+        results = await client.get_group_info(group_guid=guid)
+        group_name = results.group.group_title
+        now = datetime.now()
+        await client.send_message(
+            object_guid=guid,
+            message=f'the bot was successfully activated in chat {group_name}\n'
+                    f'- time 『 {now.hour}:{now.minute}:{now.second} 』',
+        )
+
+
 async def main():
-    async with Client(session='.myAccount', timeout=20) as client:
+    async with Client(session='.myAccount') as client:
         with console.status('bot in runing...') as status:
-            await updateAdmins(client=client)
-            for guid in groups:
-                results = await client.get_group_info(group_guid=guid)
-                group_name = results.group.group_title
-                now = datetime.now()
-                await client.send_message(
-                    object_guid=guid,
-                    message=f'the bot was successfully activated in chat {group_name}\n'
-                            f'- time 『 {now.hour}:{now.minute}:{now.second} 』',
-                )
+            await startBot(client=client)
             @client.on(handlers.MessageUpdates(models.is_group))
             async def updates(update: Message):
 
