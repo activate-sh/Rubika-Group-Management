@@ -6,8 +6,8 @@ from asyncio import run
 
 admins = [] # No need to edit this list
 groups = [
-    'g0DjNjc0eeaec8ae92ee9c9bfbdd3f95', # group one
-    # '', # group two
+    '', # group one
+    '', # group two
     # and...
 ]
 
