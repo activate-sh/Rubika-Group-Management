@@ -45,7 +45,7 @@ async def startBot(client: Client) -> None:
 
 
 async def main():
-    async with Client(session='.myAccount') as client:
+    async with Client(session='session') as client:
         with console.status('bot in runing...') as status:
             await startBot(client=client)
             @client.on(handlers.MessageUpdates(models.is_group))
