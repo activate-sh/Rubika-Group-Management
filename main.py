@@ -53,9 +53,9 @@ async def main():
 
                 for filter in filters:
                     if (
-                            update.raw_text != None and
-                            update.author_guid not in admins and
-                            filter in update.raw_text
+                        update.raw_text != None and
+                        update.author_guid not in admins and
+                        filter in update.raw_text
                     ):
                         await client.delete_messages(
                             object_guid=update.object_guid,
@@ -63,8 +63,8 @@ async def main():
                         )
                 try:
                     if (
-                            update.message.event_data.type == 'JoinedGroupByLink' or
-                            update.message.event_data.type == 'AddedGroupMembers'
+                        update.message.event_data.type == 'JoinedGroupByLink' or
+                        update.message.event_data.type == 'AddedGroupMembers'
                     ):
                         message_id = update.message_id
                         results = await client.get_group_info(group_guid=update.object_guid)
@@ -385,12 +385,12 @@ async def main():
                             )
 
 
-                    elif update.raw_text == 'info':
+                    elif update.raw_text == 'info' or update.raw_text == 'help':
                         message_id = update.message_id
                         await client.send_message(
                             object_guid=update.object_guid,
                             message='''
-📌 Robot commands:
+🔴 Robot commands:
 
 🔐 open group: `open`
 
@@ -408,13 +408,12 @@ async def main():
 
 🚫⏲ unset timer: `unset-timer`
 
-🚫👤 ban user: `ban`(be sure to replay) or `ban @id`
+🚫👤 ban user: `ban`(be sure to replay)
 
-💻 programmer: @khode_linux
+🚫👤 ban user: `ban @id`
                             ''',
                             reply_to_message_id=message_id
                         )
-
 
             await client.run_until_disconnected()
 
