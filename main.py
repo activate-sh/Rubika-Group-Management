@@ -45,7 +45,7 @@ async def startBot(client: Client) -> None:
 
 
 async def main():
-    async with Client(session='.myAccount') as client:
+    async with Client(session='session') as client:
         with console.status('bot in runing...') as status:
             await startBot(client=client)
             @client.on(handlers.MessageUpdates(models.is_group))
@@ -385,7 +385,7 @@ async def main():
                             )
 
 
-                    elif update.raw_text == 'info':
+                    elif update.raw_text == 'info' or update.raw_text == 'help':
                         message_id = update.message_id
                         await client.send_message(
                             object_guid=update.object_guid,
@@ -408,13 +408,14 @@ async def main():
 
 🚫⏲ unset timer: `unset-timer`
 
-🚫👤 ban user: `ban`(be sure to replay) or `ban @id`
+🚫👤 ban user: `ban`(be sure to replay)
 
-💻 programmer: @khode_linux
+🚫👤 ban user: `ban @id`
+
+💻 programmer: @activate_sh
                             ''',
                             reply_to_message_id=message_id
                         )
-
 
             await client.run_until_disconnected()
 
