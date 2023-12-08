@@ -5,11 +5,7 @@ from datetime import datetime
 from asyncio import run
 
 admins = [] # No need to edit this list
-groups = [
-    '', # group one
-    '', # group two
-    # and...
-]
+groups = ['g0DjNjc0eeaec8ae92ee9c9bfbdd3f95']
 
 filters = [
     '@',
@@ -345,6 +341,7 @@ async def main():
 
 
                     elif update.raw_text == 'pin':
+                        message_id = update.message_id
                         try:
                             await client.set_pin_message(
                                 object_guid=update.object_guid,
