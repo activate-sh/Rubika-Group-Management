@@ -5,7 +5,11 @@ from datetime import datetime
 from asyncio import run
 
 admins = [] # No need to edit this list
-groups = ['g0DjNjc0eeaec8ae92ee9c9bfbdd3f95']
+groups = [
+    '', # group one
+    '', # group two
+    # and...
+]
 
 filters = [
     '@',
